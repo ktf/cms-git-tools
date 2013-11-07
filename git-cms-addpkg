@@ -69,6 +69,10 @@ while [ "$#" != 0 ]; do
     --ssh )
       INITOPTIONS="$INITOPTIONS $1"
       shift;;
+    --check )
+      INITOPTIONS="$INITOPTIONS $1"
+      DO_CHECK="true"
+      shift;;
     -*)
       echo Unknown option $1 ; usage 1 ;;
     *)
@@ -106,7 +110,7 @@ if [ "$INPUT_FILE" ]; then
 fi
 
 # initialize the local repository
-git cms-init $INITOPTIONS
+sh -x git-cms-init $INITOPTIONS
 cd $CMSSW_BASE/src
 
 GITHUB_USERNAME="`git config --global --get user.github || true`"
@@ -138,10 +142,12 @@ if [ -e $CMSSW_GIT_REFERENCE/create-`whoami` ]; then
 fi
 
 # refresh the local repository
-[ -n "$CMSSW_MIRROR" ] && git remote set-url official-cmssw $CMSSW_MIRROR
-git fetch official-cmssw        2> $VERBOSE_STREAM
-git fetch official-cmssw --tags 2> $VERBOSE_STREAM
-[ -n "$CMSSW_MIRROR" ] && git remote set-url official-cmssw $OFFICIAL_CMSSW_REPO
+if [ ! "X$DO_CHECK" = X ]; then
+  [ -n "$CMSSW_MIRROR" ] && git remote set-url official-cmssw $CMSSW_MIRROR
+  git fetch official-cmssw        2> $VERBOSE_STREAM
+  git fetch official-cmssw --tags 2> $VERBOSE_STREAM
+  [ -n "$CMSSW_MIRROR" ] && git remote set-url official-cmssw $OFFICIAL_CMSSW_REPO
+fi
 
 if [ "$INPUT_FILE" ]; then
   verbose "Checking out packages"
