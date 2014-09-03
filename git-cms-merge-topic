@@ -15,6 +15,7 @@ usage() {
   $ECHO "    --https        \taccess GitHub over https (default)"
   $ECHO "    --ssh          \taccess GitHub over ssh"
   $ECHO "-q, --quiet        \tbe completely quiet"
+  $ECHO "--no-commit        \tdo not do the final commit when merging"
   $ECHO "-u, --unsafe       \tdo not perform checkdeps at the end"
   $ECHO "-v, --verbose      \tshow verbose output"
   exit 1
@@ -61,6 +62,10 @@ while [ $# -gt 0 ]; do
       ;;
     --ssh )
       PROTOCOL=ssh
+      shift
+      ;;
+    --no-commit )
+      NO_COMMIT=--no-commit 
       shift
       ;;
     -*)
@@ -137,7 +142,7 @@ git checkout $CURRENT_BRANCH
 # Add the missing files.
 git read-tree -mu HEAD
 # This should always be a FF commit.
-git merge --ff merge-attempt >$DEBUG_STREAM 
+git merge $NO_COMMIT --ff merge-attempt >$DEBUG_STREAM 
 # Delete the branch used for merge
 git branch -D merge-attempt >$DEBUG_STREAM || true
 # Do checkdeps unless not specified.
